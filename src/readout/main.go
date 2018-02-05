@@ -61,37 +61,35 @@ func pollSmartPi(config *smartpi.Config, device *i2c.Device) {
 		mqttclient = newMQTTClient(config)
 	}
 
-	data := make([]float32, 22)
 	i := 0
 
-	// Pin the accumulator loop to full minutes.
-	startAt := time.Now().Truncate(time.Minute).Add(time.Minute)
+	// Pin the readout loop to full seconds.
+	startAt := time.Now().Truncate(time.Second).Add(time.Second)
 	<- time.After(time.Until(startAt))
 
 	tick := time.Tick(time.Second)
 
 	for {
-		// Restart the accumulator loop every 60 seconds.
-		if i > 59 {
+		if i > 4 {
 			i = 0
-			data = make([]float32, 22)
 		}
+
+		data := make([]float32, 22)
 
 		startTime := time.Now()
 		valuesr := smartpi.ReadoutValues(device, config)
 
-		// Update the accumlator.
 		for index, _ := range data {
 			switch index {
 			case 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15:
-				data[index] += float32(valuesr[index] / 60.0)
+				data[index] = float32(valuesr[index])
 			case 16, 17, 18:
 				if valuesr[index-9] >= 0 {
-					data[index] += float32(math.Abs(valuesr[index-9]) / 3600.0)
+					data[index] = float32(math.Abs(valuesr[index-9]) / 3600.0)
 				}
 			case 19, 20, 21:
 				if valuesr[index-12] < 0 {
-					data[index] += float32(math.Abs(valuesr[index-12]) / 3600.0)
+					data[index] = float32(math.Abs(valuesr[index-12]) / 3600.0)
 				}
 			}
 		}
@@ -100,7 +98,7 @@ func pollSmartPi(config *smartpi.Config, device *i2c.Device) {
 		updatePrometheusMetrics(valuesr)
 
 		// Every 5 seconds
-		if i%5 == 0 {
+		if i == 0 {
 			if config.SharedFileEnabled {
 				writeSharedFile(config, valuesr)
 			}
@@ -111,18 +109,15 @@ func pollSmartPi(config *smartpi.Config, device *i2c.Device) {
 			}
 		}
 
-		// Every 60 seconds.
-		if i == 59 {
-			// Update SQLlite database.
-			if config.DatabaseEnabled {
-				updateSQLiteDatabase(config, data)
-			}
+		// Update SQLlite database.
+		if config.DatabaseEnabled {
+			updateSQLiteDatabase(config, data)
+		}
 
-			// Update persistent counter files.
-			if config.CounterEnabled {
-				updateCounterFile(config, consumerCounterFile, float64(data[16]+data[17]+data[18]))
-				updateCounterFile(config, producerCounterFile, float64(data[19]+data[20]+data[21]))
-			}
+		// Update persistent counter files.
+		if config.CounterEnabled {
+			updateCounterFile(config, consumerCounterFile, float64(data[16]+data[17]+data[18]))
+			updateCounterFile(config, producerCounterFile, float64(data[19]+data[20]+data[21]))
 		}
 
 		sleepFor := (1000 * time.Millisecond) - time.Since(startTime)
