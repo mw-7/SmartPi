@@ -67,8 +67,6 @@ func pollSmartPi(config *smartpi.Config, device *i2c.Device) {
 	startAt := time.Now().Truncate(time.Second).Add(time.Second)
 	<- time.After(time.Until(startAt))
 
-	tick := time.Tick(time.Second)
-
 	for {
 		if i > 4 {
 			i = 0
@@ -126,7 +124,10 @@ func pollSmartPi(config *smartpi.Config, device *i2c.Device) {
 		} else {
 			log.Debugf("Sleeping for %s", sleepFor)
 		}
-		<- tick
+
+		continueAt := time.Now().Truncate(time.Second).Add(time.Second)
+		<- time.After(time.Until(continueAt))
+
 		i++
 	}
 }
