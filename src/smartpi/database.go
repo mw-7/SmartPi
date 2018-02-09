@@ -79,7 +79,7 @@ func InsertData(databasedir string, t time.Time, v []float32) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(t.Format("2006-01-02 15:04:05"), fmt.Sprintf("%f", v[0]), fmt.Sprintf("%f", v[1]), fmt.Sprintf("%f", v[2]), fmt.Sprintf("%f", v[3]), fmt.Sprintf("%f", v[4]), fmt.Sprintf("%f", v[5]), fmt.Sprintf("%f", v[6]), fmt.Sprintf("%f", v[7]), fmt.Sprintf("%f", v[8]), fmt.Sprintf("%f", v[9]), fmt.Sprintf("%f", v[10]), fmt.Sprintf("%f", v[11]), fmt.Sprintf("%f", v[12]), fmt.Sprintf("%f", v[13]), fmt.Sprintf("%f", v[14]), fmt.Sprintf("%f", v[15]), fmt.Sprintf("%f", v[16]), fmt.Sprintf("%f", v[17]), fmt.Sprintf("%f", v[18]), fmt.Sprintf("%f", v[19]), fmt.Sprintf("%f", v[20]), fmt.Sprintf("%f", v[21]))
+	_, err = stmt.Exec(t.Format("2006-01-02 15:04:05.000"), fmt.Sprintf("%f", v[0]), fmt.Sprintf("%f", v[1]), fmt.Sprintf("%f", v[2]), fmt.Sprintf("%f", v[3]), fmt.Sprintf("%f", v[4]), fmt.Sprintf("%f", v[5]), fmt.Sprintf("%f", v[6]), fmt.Sprintf("%f", v[7]), fmt.Sprintf("%f", v[8]), fmt.Sprintf("%f", v[9]), fmt.Sprintf("%f", v[10]), fmt.Sprintf("%f", v[11]), fmt.Sprintf("%f", v[12]), fmt.Sprintf("%f", v[13]), fmt.Sprintf("%f", v[14]), fmt.Sprintf("%f", v[15]), fmt.Sprintf("%f", v[16]), fmt.Sprintf("%f", v[17]), fmt.Sprintf("%f", v[18]), fmt.Sprintf("%f", v[19]), fmt.Sprintf("%f", v[20]), fmt.Sprintf("%f", v[21]))
 	if err != nil {
 		log.Println(err)
 	}
